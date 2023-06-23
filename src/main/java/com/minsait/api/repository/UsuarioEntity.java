@@ -37,4 +37,28 @@ public class UsuarioEntity {
 
     @Column(name = "PERMISSOES")
     private String permissoes;
+
+    public Specification<UsuarioEntity> usuarioEntitySpecification(){
+
+        return (root, query, criteruaBuilder) ->{
+            List<Predicate> predicates = new ArrayList<>();
+
+            if(this.getNome() != null){
+                predicates.add(criteruaBuilder.like(criteruaBuilder.lower(root.get("nome")),
+                        "%"+this.getNome().trim().toLowerCase()+"%"));
+
+            }
+
+            if(this.getLogin() != null){
+                predicates.add(criteruaBuilder.like(criteruaBuilder.lower(root.get("login")),this.getNome()));
+
+            }
+
+            if(this.getEmail() != null){
+                predicates.add(criteruaBuilder.like(criteruaBuilder.lower(root.get("email")), "%"+this.getEmail()));
+            }
+            return  criteruaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+    }
 }

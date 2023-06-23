@@ -30,12 +30,21 @@ public class AuthController {
 
     @PostMapping("/get-token")
     public ResponseEntity<GetTokenResponse> getToken(@RequestBody GetTokenRequest request){
-        if(request.getPassword().equals("12345") && request.getUserName().equals("root")){
-            final ArrayList<String> permissions = new ArrayList<>();
-            permissions.add("LEITURA_CLIENTE");
-            permissions.add("ESCRITA_CLIENTE");
 
-            final var token =jwtUtil.generateToken("admin", permissions, 5);
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        final var usuario =  usuarioRepository.findByLogin(request.getUserName());
+
+        boolean senhaIguais = encoder.matches(request.getPassword(),usuario.getSenha());
+
+        if(Objects.nonNull(usuario.getLogin()) && senhaIguais){
+            final ArrayList<String> permissions = new ArrayList<>();
+            final String[] permissonsSprint = usuario.getPermissoes().split(",");
+
+            for (String permissao : permissonsSprint) {
+                permissions.add(permissao);
+            }
+
+            final var token =jwtUtil.generateToken(usuario.getNome(), permissions, usuario.getId().intValue());
             return new ResponseEntity<>(GetTokenResponse.builder()
                     .accessToken(token)
                     .build(), HttpStatus.OK);
