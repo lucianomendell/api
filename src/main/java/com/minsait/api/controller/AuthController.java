@@ -34,9 +34,13 @@ public class AuthController {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         final var usuario =  usuarioRepository.findByLogin(request.getUserName());
 
+        if(Objects.isNull(usuario)){
+            return new ResponseEntity<>(GetTokenResponse.builder().build(), HttpStatus.UNAUTHORIZED);
+        }
+
         boolean senhaIguais = encoder.matches(request.getPassword(),usuario.getSenha());
 
-        if(Objects.nonNull(usuario.getLogin()) && senhaIguais){
+        if(senhaIguais){
             final ArrayList<String> permissions = new ArrayList<>();
             final String[] permissonsSprint = usuario.getPermissoes().split(",");
 
